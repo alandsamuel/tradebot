@@ -4,9 +4,13 @@ const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 const config = require('./config.json');
+const discordJS = require('discord.js');
+const winston = require('winston');
 
 const steamClient = new Steam.SteamClient();
 const client = new SteamUser();
+const dClient = new discordJS.client();
+const logger = new winston();
 const community = new SteamCommunity();
 const steamFriends = new Steam.SteamFriends(steamClient);
 const manager = new TradeOfferManager({
@@ -15,28 +19,42 @@ const manager = new TradeOfferManager({
 	language: 'en'
 });
 
+
+
 const logOnOptions = {
 	accountName: config.username,
 	password: config.password,
-	twoFactorCode: SteamTotp.generateAuthCode(config.sharedSecret)
+	// twoFactorCode: SteamTotp.generateAuthCode(config.sharedSecret)
 };
+
+const discordOptions = {
+	token : config.token
+}
+
+dClient.login(discordOptions.token);
 
 client.logOn(logOnOptions);
 
-client.on('loggedOn', () => {
-	console.log('Telah login ke steam');
+// ! Discord
+client.on('ready', () => {
+	console.log(`Logged in as ${client.user.tag}!`);
 	
-	client.setPersona(SteamUser.Steam.EPersonaState.Online, config.botName);
-	client.gamesPlayed('Accepting Donation');
 });
+// client.on('loggedOn', () => {
+// 	console.log('Telah login ke steam');
 	
-client.on('webSession', (sessionid, cookies) => {
-	manager.setCookies(cookies);
+// 	client.setPersona(SteamUser.Steam.EPersonaState.Online, config.botName);
+// 	client.gamesPlayed('Accepting Donation');
+// });
+	
+// client.on('webSession', (sessionid, cookies) => {
+// 	manager.setCookies(cookies);
 
-	community.setCookies(cookies);
-	community.startConfirmationChecker(10000, config.sharedSecret);
-});
+// 	community.setCookies(cookies);
+// 	community.startConfirmationChecker(10000, config.sharedSecret);
+// });
 
+// ! Steam
 manager.on('newOffer', (offer) => {
 	if (offer.itemsToGive.length = offer.itemToGet.length ) {
 		offer.accept((err, status) => {
