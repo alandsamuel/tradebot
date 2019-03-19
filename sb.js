@@ -1,16 +1,16 @@
+const config = require('./config.json');
+// const winston = require('winston');
+// const logger = new winston();
+
+// ? Steam
 const SteamUser = require('steam-user');
 const Steam = require('steam');
 const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
-const config = require('./config.json');
-const discordJS = require('discord.js');
-const winston = require('winston');
 
 const steamClient = new Steam.SteamClient();
 const client = new SteamUser();
-const dClient = new discordJS.client();
-const logger = new winston();
 const community = new SteamCommunity();
 const steamFriends = new Steam.SteamFriends(steamClient);
 const manager = new TradeOfferManager({
@@ -19,21 +19,28 @@ const manager = new TradeOfferManager({
 	language: 'en'
 });
 
-
-
 const logOnOptions = {
 	accountName: config.username,
 	password: config.password,
 	// twoFactorCode: SteamTotp.generateAuthCode(config.sharedSecret)
 };
 
-const discordOptions = {
-	token : config.token
-}
-
-dClient.login(discordOptions.token);
-
+console.log(`starting application ${config.appname}`);
 client.logOn(logOnOptions);
+client.on('logon', () => {
+		console.log(`Trying Log In as ${config.username}`)
+})
+
+// ? Discord
+// const Discord = require('discord.js');
+// const discordClient = new Discord.client();
+
+// const discordOptions = {
+// 	token : config.token
+// }
+
+// discordClient.login(discordOptions.token);
+
 
 // ! Discord
 client.on('ready', () => {
